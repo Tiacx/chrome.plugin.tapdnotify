@@ -29,6 +29,8 @@ new Notification('Hello World!', {
 > 3.如果步骤2测试失败（没有效果），则查询电脑设置，查看是否已开户应用通知
 方法：win+x+n 打开设置-》左上角搜索“通知”-》选择“启用或关闭应用通知”-》允许“获取来自应用和其他发送者的通知”
 
+![通知设置](https://github.com/Tiacx/chrome.plugin.tapdnotify/blob/master/help.png)
+
 ### 赞赏
 如果您觉得此插件还不错，能帮到你提高工作效率。可以打赏一下，金额不限。嗯。
-
+![赞赏](https://github.com/Tiacx/chrome.plugin.tapdnotify/blob/master/alipay.png)

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TAPD任务提醒</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <style type="text/css">
+        .list-group{margin-bottom: 0;}
+        .list-group .list-group-item{padding: 6px 15px; text-align: center;}
+        .label-checkbox{cursor: pointer; font-weight: normal; margin-bottom: 0; width: 80px; text-align: left;}
+        .label-checkbox i{float: left; margin: 1px 4px 0 0;}
+        .ajax-interval,.renotify-interval{width: 38px !important;}
+        .help{color: #ffffff}
+        .help:hover{color: #c0fde6}
+    </style>
+</head>
+<body>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <button type="button" class="btn btn-default btn-show-mytasks">
+                <i class="glyphicon glyphicon-list"></i>
+                全部任务
+            </button>
+        </li>
+        <li class="list-group-item active">
+            间隔设置
+            <a href="https://github.com/Tiacx/chrome.plugin.tapdnotify" class="help" target="blank" title="使用手册"><i class="glyphicon glyphicon-question-sign"></i></a>
+        </li>
+        <li class="list-group-item">
+            <div class="input-group input-group-sm">
+                <span class="input-group-addon">轮询:</span>
+                <input type="text" class="form-control ajax-interval">
+                <span class="input-group-addon">秒</span>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="input-group input-group-sm">
+                <span class="input-group-addon">重复:</span>
+                <input type="text" class="form-control renotify-interval">
+                <span class="input-group-addon">天</span>
+            </div>
+        </li>
+        <li class="list-group-item active">
+            消息订阅
+        </li>
+        <li class="list-group-item">
+            <label for="" class="label-checkbox">
+                <i class="glyphicon glyphicon-unchecked" data-value="new"></i> new
+            </label>
+        </li>
+        <li class="list-group-item">
+            <label for="" class="label-checkbox">
+                <i class="glyphicon glyphicon-unchecked" data-value="待开发"></i> 待开发
+            </label>
+        </li>
+        <li class="list-group-item">
+            <label for="" class="label-checkbox">
+                <i class="glyphicon glyphicon-unchecked" data-value="开发中"></i> 开发中
+            </label>
+        </li>
+        <li class="list-group-item">
+            <label for="" class="label-checkbox">
+                <i class="glyphicon glyphicon-unchecked" data-value="转测试"></i> 转测试
+            </label>
+        </li>
+        <li class="list-group-item">
+            <label for="" class="label-checkbox">
+                <i class="glyphicon glyphicon-unchecked" data-value="已发布"></i> 已发布
+            </label>
+        </li>
+        <li class="list-group-item">
+            <label for="" class="label-checkbox">
+                <i class="glyphicon glyphicon-unchecked" data-value="临时取消"></i> 临时取消
+            </label>
+        </li>
+        <li class="list-group-item">
+            <label for="" class="label-checkbox">
+                <i class="glyphicon glyphicon-unchecked" data-value="已关闭"></i> 已关闭
+            </label>
+        </li>
+        <li class="list-group-item active">
+            赞赏
+        </li>
+        <li class="list-group-item">
+            <img src="alipay.png" height="100" alt="赞赏">
+        </li>
+    </ul>
+
+    <script type="text/javascript" src="popup.js"></script>
+</body>
+</html>

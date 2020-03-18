@@ -1,0 +1,30 @@
+{
+    "name": "TAPD任务提醒",
+    "version": "1.0",
+    "manifest_version": 2,
+    "permissions": ["tabs", "notifications", "http://*/*", "https://*/*"],
+    "description": "TAPD任务状态变更提醒",
+    "icons":
+    {
+        "16": "static/icons/icon_16.png",
+        "32": "static/icons/icon_32.png",
+        "48": "static/icons/icon_48.png",
+        "64": "static/icons/icon_64.png"
+    },
+    "content_scripts": [
+    {
+        "js": [
+          "static/js/jquery-3.3.1.min.js",
+          "static/js/chrome.plugin.notify.js",
+          "content.js"
+        ],
+        "matches": ["https://www.tapd.cn/*"],
+        "run_at": "document_end"
+    }],
+    "browser_action":
+    {
+        "default_title": "",
+        "default_icon": "static/icons/icon_32.png",
+        "default_popup": "popup.html"
+    }
+}
