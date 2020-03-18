@@ -33,4 +33,5 @@ new Notification('Hello World!', {
 
 ### 赞赏
 如果您觉得此插件还不错，能帮到你提高工作效率。可以打赏一下，金额不限。嗯。
+
 ![赞赏](https://github.com/Tiacx/chrome.plugin.tapdnotify/blob/master/alipay.png)
