@@ -161,15 +161,19 @@ function showMyTasks() {
     ow.document.write(content);
 }
 
-function checkAndNotify(item) {
-    var owner = $('.avatar-text-default').attr('title');
-    if (item.owner == owner && item.status!='新bug') return false;
-
+function checkAndNotify(item, init) {
     var notify_history = getCacheObj('notify_history', {});
     var renotify_interval = getCache('config.renotify_interval', 0) * 86400;
     var last_notifytime = notify_history[item.entityid] || 0;
     var now = getTimeStamp();
     var status_on = getCache('config.status.'+item.status, 0);
+
+    if (init == true) {
+        notify_history[item.entityid] = now;
+        setCache('notify_history', notify_history);
+        return;
+    }
+
     if (renotify_interval == 0 && notify_history[item.entityid]) {
         return false;
     } else if (now-last_notifytime >= renotify_interval && status_on == 1) {
@@ -185,7 +189,7 @@ function checkAndNotify(item) {
     }
 }
 
-function checkTaskStatus() {
+function checkTaskStatus(init=false) {
     if (location.href.indexOf('/view/') > -1) {
         return false;
     }
@@ -210,7 +214,7 @@ function checkTaskStatus() {
                     var matches = item.href.match(/\d+/g);
                     item.entityid = matches[1];
                     mytasks[matches[1]] = item;
-                    checkAndNotify(item);
+                    checkAndNotify(item, init);
                     getStory(matches[0], matches[1], function(res, entityid){
                         if (res && res.data.story) {
                             getSubTasks(res.data.story, entityid, function(res, relateid){
@@ -223,7 +227,7 @@ function checkTaskStatus() {
                                         'status': $(this).find('.j-item-status__change').attr('title'),
                                         'owner': $(this).find('.field-td-owner').attr('data-editable-value')
                                     }
-                                    checkAndNotify(sitem);
+                                    checkAndNotify(sitem, init);
                                     mytasks[relateid].related.push(sitem);
                                     setCache('mytasks', mytasks);
                                 });
@@ -234,7 +238,7 @@ function checkTaskStatus() {
             })
         });
 
-        window.setTimeout(checkTaskStatus, getCache('config.ajax_interval', 30)*1000);
+        window.setTimeout(checkTaskStatus, getCache('config.ajax_interval', 60)*1000);
 
     }, 'html');
 }
@@ -247,4 +251,7 @@ chrome.runtime.onMessage.addListener(function(mixed, sender, sendResponse) {
     }
 });
 
-window.setTimeout(checkTaskStatus, 5000);
+window.setTimeout(function(){
+    var init = getCache('notify_history', false)===false? true:false;
+    checkTaskStatus(init);
+}, 5000);

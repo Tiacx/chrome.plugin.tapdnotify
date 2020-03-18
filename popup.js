@@ -52,7 +52,7 @@ document.querySelector('.btn-show-mytasks').addEventListener('click', function()
 document.querySelector('.ajax-interval').addEventListener('blur', function(){
     var config = getCacheObj('config', {});
     var interval = parseInt(this.value) || 0;
-    interval = interval>5? interval:30;
+    interval = interval>5? interval:60;
     config['ajax_interval'] = interval;
     setCache('config', config);
     this.value = interval;
@@ -60,7 +60,7 @@ document.querySelector('.ajax-interval').addEventListener('blur', function(){
 
 document.querySelector('.renotify-interval').addEventListener('blur', function(){
     var config = getCacheObj('config', {});
-    var interval = parseInt(this.value) || 0;
+    var interval = parseFloat(this.value) || 0;
     interval = interval>0? interval:0;
     config['renotify_interval'] = interval;
     setCache('config', config);
@@ -79,7 +79,7 @@ function checkIsChecked() {
 }
 
 function init() {
-    document.querySelector('.ajax-interval').value = getCache('config.ajax_interval', 30);
+    document.querySelector('.ajax-interval').value = getCache('config.ajax_interval', 60);
     document.querySelector('.renotify-interval').value = getCache('config.renotify_interval', 0);
 
     checkIsChecked();
