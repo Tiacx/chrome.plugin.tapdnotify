@@ -173,7 +173,7 @@ function checkAndNotify(item) {
     if (renotify_interval == 0 && notify_history[item.entityid]) {
         return false;
     } else if (now-last_notifytime >= renotify_interval && status_on == 1) {
-        notifyMe(item.status, {
+        notifyMe('--' + item.status, {
             body: item.title,
             icon: 'https://www.tapd.cn/favicon.ico'
         }, ()=>{
@@ -186,49 +186,53 @@ function checkAndNotify(item) {
 }
 
 function checkTaskStatus() {
-    if ($('.j-worktable-project__item').length == 0) return false;
+    $.get('https://www.tapd.cn/my_worktable/index/todo', function(worktable_html){
+        var worktable = $(worktable_html);
+        if (worktable.find('.j-worktable-project__item').length == 0) return false;
 
-    var mytasks = {};
-    $('.j-worktable-project__item').each(function(){
-        var workspace_id = $(this).find('.j-item-link').attr('workspace_id');
-        getTask(workspace_id, function(res){
-            $(res).find('.rowNOTdone').each(function(){
-                var item = {
-                    'entityid': '',
-                    'title': $(this).find('.preview-title').attr('title'),
-                    'href': $(this).find('.preview-title').attr('href'),
-                    'status': $(this).find('.j-item-status__change').attr('title'),
-                    'owner': $('.avatar-text-default').attr('title'),
-                    'related': []
-                }
-                var matches = item.href.match(/\d+/g);
-                item.entityid = matches[1];
-                mytasks[matches[1]] = item;
-                checkAndNotify(item);
-                getStory(matches[0], matches[1], function(res, entityid){
-                    if (res && res.data.story) {
-                        getSubTasks(res.data.story, entityid, function(res, relateid){
-                            mytasks[relateid].related = [];
-                            $(res).find('.substory-tab-table tr:gt(1)').each(function(){
-                                var sitem = {
-                                    'entityid': $(this).attr('story_id'),
-                                    'title': $(this).find('.cell-title').attr('title'),
-                                    'href': $(this).find('.cell-title').attr('href'),
-                                    'status': $(this).find('.j-item-status__change').attr('title'),
-                                    'owner': $(this).find('.field-td-owner').attr('data-editable-value')
-                                }
-                                checkAndNotify(sitem);
-                                mytasks[relateid].related.push(sitem);
-                                setCache('mytasks', mytasks);
-                            });
-                        });
+        var mytasks = {};
+        worktable.find('.j-worktable-project__item').each(function(){
+            var workspace_id = $(this).find('.j-item-link').attr('workspace_id');
+            getTask(workspace_id, function(res){
+                $(res).find('.rowNOTdone').each(function(){
+                    var item = {
+                        'entityid': '',
+                        'title': $(this).find('.preview-title').attr('title'),
+                        'href': $(this).find('.preview-title').attr('href'),
+                        'status': $(this).find('.j-item-status__change').attr('title'),
+                        'owner': $('.avatar-text-default').attr('title'),
+                        'related': []
                     }
+                    var matches = item.href.match(/\d+/g);
+                    item.entityid = matches[1];
+                    mytasks[matches[1]] = item;
+                    checkAndNotify(item);
+                    getStory(matches[0], matches[1], function(res, entityid){
+                        if (res && res.data.story) {
+                            getSubTasks(res.data.story, entityid, function(res, relateid){
+                                mytasks[relateid].related = [];
+                                $(res).find('.substory-tab-table tr:gt(1)').each(function(){
+                                    var sitem = {
+                                        'entityid': $(this).attr('story_id'),
+                                        'title': $(this).find('.cell-title').attr('title'),
+                                        'href': $(this).find('.cell-title').attr('href'),
+                                        'status': $(this).find('.j-item-status__change').attr('title'),
+                                        'owner': $(this).find('.field-td-owner').attr('data-editable-value')
+                                    }
+                                    checkAndNotify(sitem);
+                                    mytasks[relateid].related.push(sitem);
+                                    setCache('mytasks', mytasks);
+                                });
+                            });
+                        }
+                    });
                 });
-            });
-        })
-    });
+            })
+        });
 
-    window.setTimeout(checkTaskStatus, getCache('config.ajax_interval', 30)*1000);
+        window.setTimeout(checkTaskStatus, getCache('config.ajax_interval', 30)*1000);
+
+    }, 'html');
 }
 
 chrome.runtime.onMessage.addListener(function(mixed, sender, sendResponse) {
