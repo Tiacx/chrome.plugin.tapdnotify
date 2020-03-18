@@ -14,7 +14,7 @@ function openWindow(url, width, height)
 
 function getTask(workspace_id, _cb) {
     var timestamp = getTimeStamp();
-    var url = `https://www.tapd.cn/my_worktable/workspace_change/${workspace_id}?portlet_id=58&type=todo&_=${timestamp}`;
+    var url = `https://www.tapd.cn/my_worktable/workspace_change/${workspace_id}?portlet_id=todo_all&type=todo&_=${timestamp}`;
     $.get(url, function(res){
         _cb(res);
     }, 'html');
@@ -163,7 +163,7 @@ function showMyTasks() {
 
 function checkAndNotify(item) {
     var owner = $('.avatar-text-default').attr('title');
-    if (item.owner == owner) return false;
+    if (item.owner == owner && item.status!='新bug') return false;
 
     var notify_history = getCacheObj('notify_history', {});
     var renotify_interval = getCache('config.renotify_interval', 0) * 86400;
@@ -198,7 +198,7 @@ function checkTaskStatus() {
         worktable.find('.j-worktable-project__item').each(function(){
             var workspace_id = $(this).find('.j-item-link').attr('workspace_id');
             getTask(workspace_id, function(res){
-                $(res).find('.rowNOTdone').each(function(){
+                $(res).find('.tfl-editable').each(function(){
                     var item = {
                         'entityid': '',
                         'title': $(this).find('.preview-title').attr('title'),
