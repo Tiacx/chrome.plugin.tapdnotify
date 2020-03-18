@@ -186,6 +186,10 @@ function checkAndNotify(item) {
 }
 
 function checkTaskStatus() {
+    if (location.href.indexOf('/view/') > -1) {
+        return false;
+    }
+
     $.get('https://www.tapd.cn/my_worktable/index/todo', function(worktable_html){
         var worktable = $(worktable_html);
         if (worktable.find('.j-worktable-project__item').length == 0) return false;
