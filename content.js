@@ -28,7 +28,7 @@ function getStory(workspace_id, entityid, _cb) {
     }, 'json');
 }
 
-function getParent(story, relateid, _cb) {
+function getParent(story, _cb) {
     var timestamp = getTimeStamp();
     var url = `https://www.tapd.cn/${story.workspace_id}/prong/stories/view/${story.parent_id}`;
     $.get(url, function(res){
@@ -172,19 +172,34 @@ function showMyTasks() {
 function checkAndNotify(item, init) {
     var notify_history = getCacheObj('notify_history', {});
     var renotify_interval = getCache('config.renotify_interval', 0) * 86400;
-    var last_notifytime = notify_history[item.entityid] || 0;
     var now = getTimeStamp();
-    var status_on = getCache('config.status.'+item.status, 0);
+    var status = getCache('config.status.'+item.status, 0);
+    if (item.relateid != undefined) {
+        var mytasks = getCacheObj('mytasks', {});
+        var cache_key = item.relateid;
+        // 检查是否已经通知过了
+        if (notify_history[cache_key] != undefined) {
+            // 当前状态和父级状态不一样，且用户订阅了此状态
+            if (item.status != mytasks[item.relateid].status && status > 0) {
+                status = 1;
+            }
+        } else {
+            status = 1;
+        }
+    } else {
+        var cache_key = item.entityid;
+    }
+    var last_notifytime = notify_history[cache_key] || 0;
 
     if (init == true) {
-        notify_history[item.entityid] = now;
+        notify_history[cache_key] = now;
         setCache('notify_history', notify_history);
         return;
     }
 
-    if (renotify_interval == 0 && notify_history[item.entityid]) {
+    if (renotify_interval == 0 && notify_history[cache_key]) {
         return false;
-    } else if (now-last_notifytime >= renotify_interval && status_on == 1) {
+    } else if (status == 1 && (now-last_notifytime) >= renotify_interval) {
         notifyMe('--' + item.status, {
             body: item.title,
             icon: 'https://www.tapd.cn/favicon.ico'
@@ -192,7 +207,7 @@ function checkAndNotify(item, init) {
             window.open(item.href);
         });
 
-        notify_history[item.entityid] = now;
+        notify_history[cache_key] = now;
         setCache('notify_history', notify_history);
     }
 }
@@ -227,34 +242,36 @@ function checkTaskStatus(init=false) {
                         if (!res) return false;
                         var parent_title = res.data.show_fields.parent_id.value.toLowerCase();
                         if (res.data.show_fields.parent_id && (parent_title.indexOf('java') > -1) || parent_title.indexOf('接口') > -1) {
-                            getParent(res.data.story, entityid, function(res, story){
+                            getParent(res.data.story, function(res, story){
                                 mytasks[story.id].related = [];
                                 var oPage = $(res);
                                 var sitem = {
+                                    'relateid': story.id,
                                     'entityid': story.parent_id,
                                     'title': oPage.find('.story-title').attr('data-editable-value'),
                                     'href': `https://www.tapd.cn/${story.workspace_id}/prong/stories/view/${story.parent_id}`,
                                     'status': oPage.find('.status-field').attr('title'),
                                     'owner': oPage.find('#ContentStatusOwner').attr('data-editable-value')
                                 }
-                                checkAndNotify(sitem, init);
                                 mytasks[story.id].related.push(sitem);
                                 setCache('mytasks', mytasks);
+                                checkAndNotify(sitem, init);
                             });
                         } else if (res.data.story) {
                             getSubTasks(res.data.story, entityid, function(res, relateid){
                                 mytasks[relateid].related = [];
                                 $(res).find('.substory-tab-table tr:gt(1)').each(function(){
                                     var sitem = {
+                                        'relateid': relateid,
                                         'entityid': $(this).attr('story_id'),
                                         'title': $(this).find('.cell-title').attr('title'),
                                         'href': $(this).find('.cell-title').attr('href'),
                                         'status': $(this).find('.j-item-status__change').attr('title'),
                                         'owner': $(this).find('.field-td-owner').attr('data-editable-value')
                                     }
-                                    checkAndNotify(sitem, init);
                                     mytasks[relateid].related.push(sitem);
                                     setCache('mytasks', mytasks);
+                                    checkAndNotify(sitem, init);
                                 });
                             });
                         }
