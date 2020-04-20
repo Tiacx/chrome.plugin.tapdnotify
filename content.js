@@ -22,10 +22,18 @@ function getTask(workspace_id, _cb) {
 
 function getStory(workspace_id, entityid, _cb) {
     var timestamp = getTimeStamp();
-    var url = `https://www.tapd.cn/api/prong/entity_preview/story_preview_data?workspace_id=${workspace_id}&id=${entityid}&from=my_worktable&t=${timestamp}&_=${timestamp}`;
+    var url = `https://www.tapd.cn/api/prong/entity_preview/story_preview_data?workspace_id=${workspace_id}&id=${entityid}&from=my_worktable&t=${timestamp}&inline_info=true`;
     $.get(url, function(res){
         _cb(res, entityid);
     }, 'json');
+}
+
+function getParent(story, relateid, _cb) {
+    var timestamp = getTimeStamp();
+    var url = `https://www.tapd.cn/${story.workspace_id}/prong/stories/view/${story.parent_id}`;
+    $.get(url, function(res){
+        _cb(res, story);
+    }, 'html');
 }
 
 function getSubTasks(story, relateid, _cb) {
@@ -216,7 +224,24 @@ function checkTaskStatus(init=false) {
                     mytasks[matches[1]] = item;
                     checkAndNotify(item, init);
                     getStory(matches[0], matches[1], function(res, entityid){
-                        if (res && res.data.story) {
+                        if (!res) return false;
+                        var parent_title = res.data.show_fields.parent_id.value.toLowerCase();
+                        if (res.data.show_fields.parent_id && (parent_title.indexOf('java') > -1) || parent_title.indexOf('接口') > -1) {
+                            getParent(res.data.story, entityid, function(res, story){
+                                mytasks[story.id].related = [];
+                                var oPage = $(res);
+                                var sitem = {
+                                    'entityid': story.parent_id,
+                                    'title': oPage.find('.story-title').attr('data-editable-value'),
+                                    'href': `https://www.tapd.cn/${story.workspace_id}/prong/stories/view/${story.parent_id}`,
+                                    'status': oPage.find('.status-field').attr('title'),
+                                    'owner': oPage.find('#ContentStatusOwner').attr('data-editable-value')
+                                }
+                                checkAndNotify(sitem, init);
+                                mytasks[story.id].related.push(sitem);
+                                setCache('mytasks', mytasks);
+                            });
+                        } else if (res.data.story) {
                             getSubTasks(res.data.story, entityid, function(res, relateid){
                                 mytasks[relateid].related = [];
                                 $(res).find('.substory-tab-table tr:gt(1)').each(function(){
