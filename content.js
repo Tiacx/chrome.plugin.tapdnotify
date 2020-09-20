@@ -22,7 +22,7 @@ function getTask(workspace_id, _cb) {
 
 function getStory(workspace_id, entityid, _cb) {
     var timestamp = getTimeStamp();
-    var url = `https://www.tapd.cn/api/prong/entity_preview/story_preview_data?workspace_id=${workspace_id}&id=${entityid}&from=my_worktable&t=${timestamp}&inline_info=true`;
+    var url = `https://www.tapd.cn/api/entity/entity_preview/story_preview_data?workspace_id=${workspace_id}&id=${entityid}&from=my_worktable&t=${timestamp}&inline_info=true`;
     $.get(url, function(res){
         _cb(res, entityid);
     }, 'json');
@@ -237,6 +237,7 @@ function checkTaskStatus(init=false) {
                     var matches = item.href.match(/\d+/g);
                     item.entityid = matches[1];
                     mytasks[matches[1]] = item;
+                    setCache('mytasks', mytasks);
                     checkAndNotify(item, init);
                     getStory(matches[0], matches[1], function(res, entityid){
                         if (!res) return false;
