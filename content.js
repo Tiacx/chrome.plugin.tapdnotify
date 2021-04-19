@@ -166,7 +166,9 @@ function showMyTasks() {
 </html>`;
 
     var ow = openWindow('about:blank');
-    ow.document.write(content);
+    ow.setTimeout(function(){
+        ow.document.write(content);
+    }, 100);
 }
 
 function checkAndNotify(item, init) {
@@ -217,13 +219,14 @@ function checkTaskStatus(init=false) {
         return false;
     }
 
-    $.get('https://www.tapd.cn/my_worktable/index/todo', function(worktable_html){
+    $.get('https://www.tapd.cn/my_worktable/expiration_date_view?timestamp='+(new Date()).getTime(), function(worktable_html){
         var worktable = $(worktable_html);
         if (worktable.find('.j-worktable-project__item').length == 0) return false;
 
         var mytasks = {};
         worktable.find('.j-worktable-project__item').each(function(){
             var workspace_id = $(this).find('.j-item-link').attr('workspace_id');
+            console.log(workspace_id);
             getTask(workspace_id, function(res){
                 $(res).find('.tfl-editable').each(function(){
                     var item = {
